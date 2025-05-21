@@ -30,8 +30,7 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
-service = Service(r'/usr/local/bin/chromedriver')
-web = webdriver.Chrome(service=service, options=chrome_options)
+web = webdriver.Chrome(options=chrome_options)
 
 def notify(message):
     """发送通知到 ntfy 服务器"""
