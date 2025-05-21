@@ -14,7 +14,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.11'  # 可选你支持的版本
+        python-version: '3.11'
 
     - name: Install dependencies
       run: pip install -r requirements.txt
@@ -25,11 +25,11 @@ jobs:
         chrome-version: stable
 
     - name: Install matching ChromeDriver
-      uses: nanasess/setup-chromedriver@v2
+      uses: browser-actions/setup-chromedriver@v1
       with:
-        chromedriver-version: 'matching'  # 自动与系统 Chrome 匹配
+        chrome-version: stable
 
-    - name: 查看版本 (调试可选)
+    - name: 查看版本（可选）
       run: |
         google-chrome --version
         chromedriver --version
