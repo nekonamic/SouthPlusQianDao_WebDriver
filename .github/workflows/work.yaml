@@ -16,26 +16,36 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install Google Chrome & matching ChromeDriver
+      run: |
+        sudo apt update
+        sudo apt install -y unzip wget curl
+
+        # 安装 Chrome
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+
+        # 获取 Chrome 版本
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+        echo "Detected Chrome version: $CHROME_VERSION"
+
+        # 提取前3段版本号
+        CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1-3)
+
+        # 获取对应的 ChromeDriver 下载链接
+        DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r --arg ver "$CHROME_MAJOR" '.channels.Stable.downloads.chromedriver[] | select(.platform == "linux64") | .url')
+
+        echo "Downloading chromedriver from $DRIVER_VERSION"
+        wget "$DRIVER_VERSION" -O chromedriver.zip
+        unzip chromedriver.zip
+        chmod +x chromedriver-linux64/chromedriver
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+
+    - name: 安装依赖
       run: pip install -r requirements.txt
 
-    - name: Install Google Chrome
-      uses: browser-actions/setup-chrome@v1
-      with:
-        chrome-version: stable
-
-    - name: Install matching ChromeDriver
-      uses: browser-actions/setup-chromedriver@v1
-      with:
-        chrome-version: stable
-
-    - name: 查看版本（可选）
-      run: |
-        google-chrome --version
-        chromedriver --version
-
-    - name: 运行脚本
+    - name: 执行签到脚本
       env:
         COOKIE: ${{ secrets.COOKIE }}
-        ntfyUrl: ${{ secrets.NTFYURL }}
+        ntfyUrl: ${{ secrets.ntfyUrl }}
       run: python byWebdrvier.py
